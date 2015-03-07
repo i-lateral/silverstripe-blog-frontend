@@ -19,7 +19,7 @@ if(class_exists('Widget')) {
 			if(!class_exists('Comment')) return false;
             
             $unmoderated = Comment::get()
-                ->filter("Moderated", 1)
+                ->filter("Moderated", 0)
                 ->count();
             
 			if($unmoderated == 1) {
@@ -35,7 +35,7 @@ if(class_exists('Widget')) {
 			if(!Permission::check('BLOG_FRONTENDMANAGEMENT') || !class_exists('Comment')) return false;
 			
             $unmoderated = Comment::get()
-                ->filter("Moderated", 1)
+                ->filter("Moderated", 0)
                 ->count();
 
 			if($unmoderated > 0)
@@ -54,10 +54,25 @@ if(class_exists('Widget')) {
 			} 
 		}
 		
-		function PostLink() {
-			$container = Controller::curr();
+		function CreatePostLink() {
+			$controller = Controller::curr();
             
-			return ($container && $container->ClassName == "Blog") ? $container->Link('post') : false; 
+            if($controller && $controller->ClassName == "Blog")
+                return $controller->Link('post');
+            else
+                return false;
+		}
+        
+        function EditPostLink() {
+			$controller = Controller::curr();
+            
+            if($controller && $controller->ClassName == "BlogPost") {
+                return Controller::join_links(
+                    $controller->Parent()->Link('post'),
+                    $controller->ID
+                );
+            } else
+                return false;
 		}
 	}
 

@@ -32,11 +32,27 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
 		$membername = Member::currentUser() ? Member::currentUser()->getName() : "";
         
         // Set image upload
-        $uploadfield = UploadField::create('FeaturedImage', _t('BlogFrontEnd.ShareImage', "Share an image"));
+        $uploadfield = UploadField::create(
+            'FeaturedImage',
+            _t('BlogFrontEnd.ShareImage', "Share an image")
+        );
+        
         $uploadfield->setCanAttachExisting(false);
         $uploadfield->setCanPreviewFolder(false);
         $uploadfield->setAllowedFileCategories('image');
         $uploadfield->relationAutoSetting = false;
+        
+        if(BlogFrontEnd::config()->allow_wysiwyg_editing) {
+            $content_field = HTMLEditorField::create(
+                "Content", 
+                _t("BlogFrontEnd.Content")
+            );
+        } else {
+            $content_field = TextareaField::create(
+                "Content",
+                _t("BlogFrontEnd.Content")
+            );
+        }
         
         $form = new Form(
             $this->owner,
@@ -44,8 +60,7 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
             $fields = new FieldList(
                 HiddenField::create("ID", "ID"),
                 TextField::create("Title", _t('BlogFrontEnd.Title', "Title")),
-                TextareaField::create("Content", _t("BlogFrontEnd.Content"))
-                    ->setRows(25),
+                $content_field,
                 $uploadfield
             ),
             $actions = new FieldList(
@@ -87,7 +102,7 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
 		$form->saveInto($post);
 		$post->ParentID = $this->owner->ID;
 
-		$this->owner->extend("onBeforePostBlog", $blogentry);
+		$this->owner->extend("onBeforeSavePost", $blogentry);
 
 		$oldMode = Versioned::get_reading_mode();
 		Versioned::reading_stage('Stage');
@@ -95,7 +110,7 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
 		$post->publish("Stage", "Live");
 		Versioned::set_reading_mode($oldMode);
 
-		$this->owner->extend("onAfterPostBlog", $post);
+		$this->owner->extend("onAfterSavePost", $post);
 
 		$this->owner->redirect($this->owner->Link());
 	}
