@@ -1,0 +1,6 @@
+---
+Name: blogfrontend
+---
+Blog_Controller:
+  extensions:
+    - BlogFrontEndForm_BlogController
