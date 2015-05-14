@@ -12,6 +12,8 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
      * Create a new blog post
      */
     public function post() {
+        Requirements::css("blog-frontend/css/BlogFrontEnd.css");
+        
         $this->owner->customise(array(
             'Form' => $this->FrontEndPostForm()
         ));
@@ -43,7 +45,7 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
         $uploadfield->relationAutoSetting = false;
         
         if(BlogFrontEnd::config()->allow_wysiwyg_editing) {
-            $content_field = HTMLEditorField::create(
+            $content_field = TrumbowygHTMLEditorField::create(
                 "Content", 
                 _t("BlogFrontEnd.Content")
             );

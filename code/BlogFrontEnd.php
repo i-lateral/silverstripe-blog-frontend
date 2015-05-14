@@ -15,6 +15,6 @@ class BlogFrontEnd extends Object {
     * @var Boolean
     * @config
     */
-    private static $allow_wysiwyg_editing = false;
+    private static $allow_wysiwyg_editing = true;
     
 }
