@@ -3,7 +3,7 @@
 class BlogFrontEndForm_BlogController extends Extension implements PermissionProvider {
     
     private static $allowed_actions = array(
-        "post"              => "BLOG_FRONTENDMANAGEMENT", 
+        "post", 
         "doSavePost"        => "BLOG_FRONTENDMANAGEMENT",
         "FrontEndPostForm"  => "BLOG_FRONTENDMANAGEMENT"
     );
@@ -12,6 +12,8 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
      * Create a new blog post
      */
     public function post() {
+        if(!Permission::check('BLOG_FRONTENDMANAGEMENT')) return Security::permissionFailure();
+        
         Requirements::css("blog-frontend/css/BlogFrontEnd.css");
         
         $this->owner->customise(array(
