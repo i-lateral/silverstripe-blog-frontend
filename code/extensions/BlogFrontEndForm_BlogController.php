@@ -15,10 +15,19 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
         Requirements::css("blog-frontend/css/BlogFrontEnd.css");
         
         $this->owner->customise(array(
-            'Form' => $this->FrontEndPostForm()
+            "Title" => _t("BlogFrontend.PostTitle", "New Blog Post"),
+            "MetaTitle" => _t("BlogFrontend.PostMetaTitle", "New Blog Post"),
+            "Form" => $this->FrontEndPostForm()
         ));
         
-        return $this->owner->renderWith("Page");
+		$this->owner->extend("onBeforePost");
+        
+        return $this
+            ->owner
+            ->renderWith(array(
+                "Blog_post",
+                "Page"
+            ));
     }
     
     /**

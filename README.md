@@ -10,6 +10,7 @@ without logging into the admin interface.
 * [SilverStripe Framework 3.1.x](https://github.com/silverstripe/silverstripe-framework)
 * [SilverStripe CMS 3.1.x](https://github.com/silverstripe/silverstripe-cms)
 * [SilverStripe Blog](https://github.com/silverstripe/silverstripe-blog)
+* [Silverstripe Trumbowyg HTMLeditor](https://github.com/i-lateral/silverstripe-trumbowyg-htmleditor)
 
 ## Via composer
 
@@ -40,3 +41,9 @@ This module includes a management widget. You will need to install the
 Widgets module for this to work, but when installed will allow you to
 add a widget to your sidebar that adds links for creting and editing
 posts and moderating comments.
+
+## Templates
+
+By default the front end post form uses Page.ss but also supports a
+"Blog_post.ss" template (incase you want to customise the page that loads
+the blog post form).
