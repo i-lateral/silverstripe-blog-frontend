@@ -73,15 +73,15 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
             $fields = new FieldList(
                 HiddenField::create("ID", "ID"),
                 TextField::create("Title", _t('BlogFrontEnd.Title', "Title")),
-                $content_field,
-                $uploadfield
+                $uploadfield,
+                $content_field
             ),
             $actions = new FieldList(
                 FormAction::create(
                 'doSavePost',
                 _t('BlogFrontEnd.PostEntry', 'Post Entry'))
             ),
-            new RequiredFields('Title','Content')
+            new RequiredFields('Title')
         );
         
         $uploadfield->setForm($form);
@@ -91,6 +91,14 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
                 "Categories",
                 _t("BlogFrontEnd.PostUnderCategories","Post this in a category? (optional)"),
                 $this->owner->Categories()->map()
+            ));
+        }
+        
+        if($this->owner->Tags()->exists()) {
+            $fields->add(CheckboxsetField::create(
+                "Categories",
+                _t("BlogFrontEnd.AddTags","Add a tag? (optional)"),
+                $this->owner->Tags()->map()
             ));
         }
 
