@@ -1,9 +1,10 @@
 <?php
 
-class BlogFrontEndForm_BlogController extends Extension implements PermissionProvider {
+class BlogFrontEndForm_BlogController extends Extension implements PermissionProvider
+{
     
     private static $allowed_actions = array(
-        "post", 
+        "post",
         "doSavePost"        => "BLOG_FRONTENDMANAGEMENT",
         "FrontEndPostForm"  => "BLOG_FRONTENDMANAGEMENT"
     );
@@ -11,8 +12,11 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
     /**
      * Create a new blog post
      */
-    public function post() {
-        if(!Permission::check('BLOG_FRONTENDMANAGEMENT')) return Security::permissionFailure();
+    public function post()
+    {
+        if (!Permission::check('BLOG_FRONTENDMANAGEMENT')) {
+            return Security::permissionFailure();
+        }
         
         Requirements::css("blog-frontend/css/BlogFrontEnd.css");
         
@@ -22,7 +26,7 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
             "Form" => $this->FrontEndPostForm()
         ));
         
-		$this->owner->extend("onBeforePost");
+        $this->owner->extend("onBeforePost");
         
         return $this
             ->owner
@@ -33,16 +37,17 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
     }
     
     /**
-	 * A simple form for creating blog entries
-	 */
-	function FrontEndPostForm() {
-        
-		if($this->owner->request->latestParam('ID'))
-			$id = (int) $this->owner->request->latestParam('ID');
-		else
+     * A simple form for creating blog entries
+     */
+    public function FrontEndPostForm()
+    {
+        if ($this->owner->request->latestParam('ID')) {
+            $id = (int) $this->owner->request->latestParam('ID');
+        } else {
             $id = 0;
+        }
 
-		$membername = Member::currentUser() ? Member::currentUser()->getName() : "";
+        $membername = Member::currentUser() ? Member::currentUser()->getName() : "";
         
         // Set image upload
         $uploadfield = UploadField::create(
@@ -55,9 +60,9 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
         $uploadfield->setAllowedFileCategories('image');
         $uploadfield->relationAutoSetting = false;
         
-        if(BlogFrontEnd::config()->allow_wysiwyg_editing) {
+        if (BlogFrontEnd::config()->allow_wysiwyg_editing) {
             $content_field = TrumbowygHTMLEditorField::create(
-                "Content", 
+                "Content",
                 _t("BlogFrontEnd.Content")
             );
         } else {
@@ -86,57 +91,61 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
         
         $uploadfield->setForm($form);
         
-        if($this->owner->Categories()->exists()) {
+        if ($this->owner->Categories()->exists()) {
             $fields->add(CheckboxsetField::create(
                 "Categories",
-                _t("BlogFrontEnd.PostUnderCategories","Post this in a category? (optional)"),
+                _t("BlogFrontEnd.PostUnderCategories", "Post this in a category? (optional)"),
                 $this->owner->Categories()->map()
             ));
         }
         
-        if($this->owner->Tags()->exists()) {
+        if ($this->owner->Tags()->exists()) {
             $fields->add(CheckboxsetField::create(
                 "Categories",
-                _t("BlogFrontEnd.AddTags","Add a tag? (optional)"),
+                _t("BlogFrontEnd.AddTags", "Add a tag? (optional)"),
                 $this->owner->Tags()->map()
             ));
         }
 
-		if($id && $post = BlogPost::get()->byID($id)) {
+        if ($id && $post = BlogPost::get()->byID($id)) {
             $form->loadDataFrom($post);
-		}
+        }
 
-		$this->owner->extend("updateFrontEndPostForm", $form);
+        $this->owner->extend("updateFrontEndPostForm", $form);
 
-		return $form;
-	}
+        return $form;
+    }
 
-	public function doSavePost($data, $form) {
-		$post = false;
+    public function doSavePost($data, $form)
+    {
+        $post = false;
 
-		if(isset($data['ID']) && $data['ID']) {
-			$post = BlogPost::get()->byID($data['ID']);
-		}
+        if (isset($data['ID']) && $data['ID']) {
+            $post = BlogPost::get()->byID($data['ID']);
+        }
 
-		if(!$post) $post = BlogPost::create();
+        if (!$post) {
+            $post = BlogPost::create();
+        }
 
-		$form->saveInto($post);
-		$post->ParentID = $this->owner->ID;
+        $form->saveInto($post);
+        $post->ParentID = $this->owner->ID;
 
-		$this->owner->extend("onBeforeSavePost", $blogentry);
+        $this->owner->extend("onBeforeSavePost", $blogentry);
 
-		$oldMode = Versioned::get_reading_mode();
-		Versioned::reading_stage('Stage');
-		$post->write();
-		$post->publish("Stage", "Live");
-		Versioned::set_reading_mode($oldMode);
+        $oldMode = Versioned::get_reading_mode();
+        Versioned::reading_stage('Stage');
+        $post->write();
+        $post->publish("Stage", "Live");
+        Versioned::set_reading_mode($oldMode);
 
-		$this->owner->extend("onAfterSavePost", $post);
+        $this->owner->extend("onAfterSavePost", $post);
 
-		$this->owner->redirect($this->owner->Link());
-	}
+        $this->owner->redirect($this->owner->Link());
+    }
     
-    public function providePermissions() {
+    public function providePermissions()
+    {
         return array(
             "BLOG_FRONTENDMANAGEMENT" => array(
                 'name' => 'Frontend Blog Management',
@@ -146,5 +155,4 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
             )
         );
     }
-    
 }
