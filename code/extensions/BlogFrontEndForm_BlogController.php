@@ -18,11 +18,14 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
             return Security::permissionFailure();
         }
         
+        $editingExisting = !!$this->owner->request->latestParam('ID');
+        $action = $editingExisting ? 'Edit' : 'New';
+        
         Requirements::css("blog-frontend/css/BlogFrontEnd.css");
         
         $this->owner->customise(array(
-            "Title" => _t("BlogFrontend.PostTitle", "New Blog Post"),
-            "MetaTitle" => _t("BlogFrontend.PostMetaTitle", "New Blog Post"),
+            "Title" => _t("BlogFrontend.{$action}PostTitle", "{$action} Blog Post"),
+            "MetaTitle" => _t("BlogFrontend.{$action}PostMetaTitle", "{$action} Blog Post"),
             "Form" => $this->FrontEndPostForm()
         ));
         
@@ -101,14 +104,21 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
         
         if ($this->owner->Tags()->exists()) {
             $fields->add(CheckboxsetField::create(
-                "Categories",
+                "Tags",
                 _t("BlogFrontEnd.AddTags", "Add a tag? (optional)"),
                 $this->owner->Tags()->map()
             ));
         }
 
-        if ($id && $post = BlogPost::get()->byID($id)) {
-            $form->loadDataFrom($post);
+        if ($id) {
+            $oldReadingMode = Versioned::get_reading_mode();
+            Versioned::reading_stage('Stage');
+
+            if ($post = BlogPost::get()->byID($id)) {
+                $form->loadDataFrom($post);
+            }
+
+            Versioned::reading_stage($oldReadingMode);
         }
 
         $this->owner->extend("updateFrontEndPostForm", $form);
@@ -141,7 +151,20 @@ class BlogFrontEndForm_BlogController extends Extension implements PermissionPro
 
         $this->owner->extend("onAfterSavePost", $post);
 
-        $this->owner->redirect($this->owner->Link());
+        if($this->owner->config()->get('action_after_save') === 'form'){
+            $action = $data['ID'] ? 'updated' : 'created';
+            if($action === 'updated'){
+                $message = _t("BlogFrontEnd.PostEdited", "Your post has been saved!");
+            } else {
+                _t("BlogFrontEnd.PostCreated", "Your post has been created");
+            }
+            $form->sessionMessage($message, 'good');
+            $link = $this->owner->redirect($this->owner->Link('post/' . $post->ID));
+        } else {
+            $link = $this->owner->Link();
+        }
+
+        $this->owner->redirect($link);
     }
     
     public function providePermissions()
